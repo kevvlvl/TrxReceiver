@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 )
@@ -31,7 +32,7 @@ func Serve(router *chi.Mux) {
 		port = "3000"
 	}
 
-	fmt.Println("Port: ", port)
+	log.Info().Msgf("Port: %v", port)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 
