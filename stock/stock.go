@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-const INT_BASE = 10
+const IntBase = 10
 
 type Stock struct {
 	Id     int     `json:"id"`
@@ -17,13 +17,23 @@ type Stock struct {
 	Value  float32 `json:"value"`
 }
 
-func GetTransaction(r *http.Request, stockId int) {
+func GetTransaction(stockId int) (*Stock, []byte) {
 
 	redis := rdb.Client()
 
-	s := rdb.Get(strconv.FormatInt(int64(stockId), INT_BASE), redis)
+	stockStr := rdb.Get(intToStr(stockId), redis)
+	stockByte := []byte(stockStr)
 
-	log.Debug().Msgf("Found stock %+v for ID %v", s, stockId)
+	var stock Stock
+	err := json.Unmarshal(stockByte, &stock)
+
+	if err != nil {
+		log.Error().Msgf("Error trying to unmarshall string byte to Stock. %v", err)
+	}
+
+	log.Debug().Msgf("Found stock %+v for ID %v", stock, stockId)
+
+	return &stock, stockByte
 }
 
 func CreateTransaction(r *http.Request) {
@@ -32,19 +42,40 @@ func CreateTransaction(r *http.Request) {
 	parseTransactionBody(r, &s)
 	redis := rdb.Client()
 
-	json, err := json.Marshal(s)
+	jsonStock, err := json.Marshal(s)
 
 	if err != nil {
-		log.Error().Msgf("Error trying to mashall Stock to json string: %v", err)
+		log.Error().Msgf("Error trying to mashall Stock to jsonStock string: %v", err)
 	}
 
-	rdb.Set(strconv.FormatInt(int64(s.Id), INT_BASE), string(json[:]), redis)
+	rdb.Set(intToStr(s.Id), string(jsonStock[:]), redis)
+
+	log.Debug().Msgf("Successfully created stock %s", s.Id)
 }
 
 func UpdateTransaction(r *http.Request, stockId int) {
 
-	var s Stock
-	parseTransactionBody(r, &s)
+	var stockBody Stock
+	parseTransactionBody(r, &stockBody)
+
+	if stockBody.Id != stockId {
+		log.Error().Msg("The stockId in URL Path does not match request body Stock ID")
+	} else {
+
+		redis := rdb.Client()
+		stockDb := rdb.Get(intToStr(stockId), redis)
+		log.Debug().Msgf("Found existing stock %+v", stockDb)
+
+		jsonStock, err := json.Marshal(stockBody)
+
+		if err != nil {
+			log.Error().Msgf("Error trying to mashall Stock to jsonStock string: %v", err)
+		}
+
+		rdb.Set(intToStr(stockId), string(jsonStock[:]), redis)
+
+		log.Debug().Msgf("Successfully updated stock %s", stockId)
+	}
 }
 
 func parseTransactionBody(r *http.Request, s *Stock) {
@@ -56,4 +87,9 @@ func parseTransactionBody(r *http.Request, s *Stock) {
 	}
 
 	log.Debug().Msgf("Parsed JSON successfully: %+v", s)
+}
+
+func intToStr(i int) string {
+
+	return strconv.FormatInt(int64(i), IntBase)
 }

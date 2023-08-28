@@ -40,7 +40,12 @@ func HandleRoutes(router *chi.Mux) {
 				stockId := parseStockId(r)
 				log.Info().Msgf("GET on Stock ID %v", stockId)
 
-				stock.GetTransaction(r, stockId)
+				_, stockByte := stock.GetTransaction(stockId)
+
+				_, err := w.Write(stockByte)
+				if err != nil {
+					return
+				}
 			})
 
 			r.Put("/", func(w http.ResponseWriter, r *http.Request) {
