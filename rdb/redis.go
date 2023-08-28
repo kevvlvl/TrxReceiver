@@ -39,5 +39,5 @@ func Set(key string, value string, client *redis.Client) {
 		log.Error().Msgf("Error trying to set %s, %v", key, err)
 	}
 
-	log.Debug().Msgf("Added Key successfully: %v", status)
+	log.Debug().Msgf("Set Key successfully: %v", status)
 }
