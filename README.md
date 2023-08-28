@@ -56,4 +56,4 @@ API_PORT=4000 go run main.go
 5. Package app using Paketo buildpacks: https://paketo.io/docs/howto/go/
 6. Implement k6 for load testing on existing k8s cluster
 7. Add k8s manifests deployments & Paketo buildpacks here
-7View metrics on Prometheus + Grafana
+8. View metrics on Prometheus + Grafana
