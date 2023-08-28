@@ -43,9 +43,9 @@ API_PORT=4000 go run main.go
 |:---------------|:-----------------------------------------------------------------------------------------------------------------------|
 | GET root       | `curl localhost:4000/`                                                                                                 |
 | GET api health | `curl localhost:4000/health`                                                                                           |
-| GET stock trx  | `curl -X GET localhost:4000/trx/123`                                                                                   |
-| POST stock trx | `curl -X POST localhost:4000/trx -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'`    |
-| PUT stock trx  | `curl -X PUT localhost:4000/trx/123 -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'` |
+| GET trx        | `curl -X GET localhost:4000/trx/123`                                                                                   |
+| POST trx       | `curl -X POST localhost:4000/trx -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'`    |
+| PUT trx        | `curl -X PUT localhost:4000/trx/123 -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'` |
 
 ## Next
 

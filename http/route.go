@@ -1,7 +1,7 @@
 package http
 
 import (
-	"TrxReceiver/stock"
+	"TrxReceiver/transaction"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -30,19 +30,19 @@ func HandleRoutes(router *chi.Mux) {
 
 		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 
-			stock.CreateTransaction(r)
+			transaction.CreateTransaction(r)
 		})
 
-		r.Route("/{stockID}", func(r chi.Router) {
+		r.Route("/{trxID}", func(r chi.Router) {
 
 			r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 
-				stockId := parseStockId(r)
-				log.Info().Msgf("GET on Stock ID %v", stockId)
+				trxId := parseTrxId(r)
+				log.Info().Msgf("GET on Transaction ID %v", trxId)
 
-				_, stockByte := stock.GetTransaction(stockId)
+				_, trxBytes := transaction.GetTransaction(trxId)
 
-				_, err := w.Write(stockByte)
+				_, err := w.Write(trxBytes)
 				if err != nil {
 					return
 				}
@@ -50,20 +50,20 @@ func HandleRoutes(router *chi.Mux) {
 
 			r.Put("/", func(w http.ResponseWriter, r *http.Request) {
 
-				stockId := parseStockId(r)
-				log.Info().Msgf("PUT on Stock ID %v", stockId)
+				stockId := parseTrxId(r)
+				log.Info().Msgf("PUT on Transaction ID %v", stockId)
 
-				stock.UpdateTransaction(r, stockId)
+				transaction.UpdateTransaction(r, stockId)
 			})
 		})
 	})
 }
 
-func parseStockId(r *http.Request) int {
-	stockId, err := strconv.ParseInt(chi.URLParam(r, "stockID"), 10, 32)
+func parseTrxId(r *http.Request) int {
+	stockId, err := strconv.ParseInt(chi.URLParam(r, "trxID"), 10, 32)
 
 	if err != nil {
-		log.Error().Msgf("Error parsing the URL param stockID: %s", err)
+		log.Error().Msgf("Error parsing the URL param trxID: %s", err)
 	}
 
 	return int(stockId)
