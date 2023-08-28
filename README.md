@@ -46,3 +46,14 @@ API_PORT=4000 go run main.go
 | GET stock trx  | `curl -X GET localhost:4000/trx/123`                                                                                   |
 | POST stock trx | `curl -X POST localhost:4000/trx -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'`    |
 | PUT stock trx  | `curl -X PUT localhost:4000/trx/123 -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'` |
+
+## Next
+
+1. Create a simple API using go-chi with GET POST PUT ops - DONE
+2. Add logging - DONE
+3. Persist changes into an in-memory Redis cache - DONE
+4. Unit testing in go - NEXT
+5. Package app using Paketo buildpacks: https://paketo.io/docs/howto/go/
+6. Implement k6 for load testing on existing k8s cluster
+7. Add k8s manifests deployments & Paketo buildpacks here
+7View metrics on Prometheus + Grafana
