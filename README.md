@@ -10,7 +10,7 @@ For the purpose of this README, we are using podman
 Run Redis:
 ```shell
 
-❯ podman run --name rdb-db -d docker.io/rdb
+❯ podman run --name redis-db -p 127.0.0.1:6379:6379/tcp -d docker.io/redis
 Trying to pull docker.io/library/rdb:latest...
 Getting image source signatures
 Copying blob 29771da5b50b done  
