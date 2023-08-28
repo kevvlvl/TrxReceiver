@@ -8,11 +8,22 @@ import (
 	"strconv"
 )
 
+const INT_BASE = 10
+
 type Stock struct {
 	Id     int     `json:"id"`
 	Symbol string  `json:"symbol"`
 	Name   string  `json:"name"`
 	Value  float32 `json:"value"`
+}
+
+func GetTransaction(r *http.Request, stockId int) {
+
+	redis := rdb.Client()
+
+	s := rdb.Get(strconv.FormatInt(int64(stockId), INT_BASE), redis)
+
+	log.Debug().Msgf("Found stock %+v for ID %v", s, stockId)
 }
 
 func CreateTransaction(r *http.Request) {
@@ -27,7 +38,7 @@ func CreateTransaction(r *http.Request) {
 		log.Error().Msgf("Error trying to mashall Stock to json string: %v", err)
 	}
 
-	rdb.Set(strconv.FormatInt(int64(s.Id), 10), string(json), redis)
+	rdb.Set(strconv.FormatInt(int64(s.Id), INT_BASE), string(json[:]), redis)
 }
 
 func UpdateTransaction(r *http.Request, stockId int) {

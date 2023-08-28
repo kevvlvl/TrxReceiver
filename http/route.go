@@ -33,16 +33,33 @@ func HandleRoutes(router *chi.Mux) {
 			stock.CreateTransaction(r)
 		})
 
-		r.Put("/{stockID}", func(w http.ResponseWriter, r *http.Request) {
+		r.Route("/{stockID}", func(r chi.Router) {
 
-			stockId, err := strconv.ParseInt(chi.URLParam(r, "stockID"), 10, 32)
+			r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 
-			if err != nil {
-				log.Error().Msgf("Error parsing the URL param stockID: %s", err)
-			}
+				stockId := parseStockId(r)
+				log.Info().Msgf("GET on Stock ID %v", stockId)
 
-			log.Info().Msgf("PUT on Stock ID %v", stockId)
-			stock.UpdateTransaction(r, int(stockId))
+				stock.GetTransaction(r, stockId)
+			})
+
+			r.Put("/", func(w http.ResponseWriter, r *http.Request) {
+
+				stockId := parseStockId(r)
+				log.Info().Msgf("PUT on Stock ID %v", stockId)
+
+				stock.UpdateTransaction(r, stockId)
+			})
 		})
 	})
+}
+
+func parseStockId(r *http.Request) int {
+	stockId, err := strconv.ParseInt(chi.URLParam(r, "stockID"), 10, 32)
+
+	if err != nil {
+		log.Error().Msgf("Error parsing the URL param stockID: %s", err)
+	}
+
+	return int(stockId)
 }

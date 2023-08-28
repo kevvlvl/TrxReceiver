@@ -33,9 +33,11 @@ func Get(key string, client *redis.Client) string {
 }
 
 func Set(key string, value string, client *redis.Client) {
-	err := client.Set(ctx, key, value, 0).Err()
+	status, err := client.Set(ctx, key, value, 0).Result()
 
 	if err != nil {
 		log.Error().Msgf("Error trying to set %s, %v", key, err)
 	}
+
+	log.Debug().Msgf("Added Key successfully: %v", status)
 }
