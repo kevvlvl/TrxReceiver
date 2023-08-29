@@ -1,19 +1,62 @@
 package transaction
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/go-redis/redismock/v9"
 	"github.com/stretchr/testify/assert"
+	"net/http"
 	"strconv"
 	"testing"
 )
 
 func TestGetTransaction(t *testing.T) {
 
+	r, mock := redismock.NewClientMock()
+	redisClient = r
+
+	trx := stubTrx()
+	trxBytes, _ := json.Marshal(trx)
+
+	mock.ExpectGet(intToStr(trx.Id)).SetVal(string(trxBytes[:]))
+
+	resultTrx, resultTrxBytes := GetTransaction(trx.Id)
+
+	assert.Equal(t, trx.Id, resultTrx.Id, "The result trx is different from the expected trx")
+	assert.Equal(t, trxBytes, resultTrxBytes, "The result trx bytes are different from the expected trx bytes")
 }
 
-func TestParseTransactionBody(t *testing.T) {
+func TestCreateTransaction(t *testing.T) {
 
+	trx := stubTrx()
+	trxBytes, _ := json.Marshal(trx)
+
+	r, mock := redismock.NewClientMock()
+	redisClient = r
+
+	reqUrl := "localhost:4000/trx"
+	req, _ := http.NewRequest("POST", reqUrl, bytes.NewBuffer([]byte(stubTrxAsStr())))
+
+	mock.ExpectSet(intToStr(trx.Id), string(trxBytes[:]), 0).SetVal("ok")
+
+	CreateTransaction(req)
+}
+
+func TestUpdateTransaction(t *testing.T) {
+
+	trx := stubTrx()
+	trxBytes, _ := json.Marshal(trx)
+
+	r, mock := redismock.NewClientMock()
+	redisClient = r
+
+	reqUrl := "localhost:4000/trx/1234"
+	req, _ := http.NewRequest("PUT", reqUrl, bytes.NewBuffer([]byte(stubTrxAsStr())))
+
+	mock.ExpectGet(intToStr(trx.Id)).SetVal(string(trxBytes[:]))
+	mock.ExpectSet(intToStr(trx.Id), string(trxBytes[:]), 0).SetVal("ok")
+
+	UpdateTransaction(req, 1234)
 }
 
 func TestIntToStr(t *testing.T) {
@@ -28,14 +71,10 @@ func TestIntToStr(t *testing.T) {
 
 func TestWriteToRedis(t *testing.T) {
 
-	db, mock := redismock.NewClientMock()
+	r, mock := redismock.NewClientMock()
+	redisClient = r
 
-	trx := Transaction{
-		Id:     1234,
-		Symbol: "TEST",
-		Name:   "Test Transaction",
-		Value:  9001,
-	}
+	trx := stubTrx()
 
 	trxJson, err := json.Marshal(trx)
 
@@ -43,6 +82,19 @@ func TestWriteToRedis(t *testing.T) {
 		t.Error("Unexpected error marshalling test struct")
 	}
 
-	mock.ExpectSet(intToStr(trx.Id), string(trxJson[:]), 0)
-	writeToRedis(trx, db)
+	mock.ExpectSet(intToStr(trx.Id), string(trxJson[:]), 0).SetVal("ok")
+	writeToRedis(trx)
+}
+
+func stubTrx() Transaction {
+	return Transaction{
+		Id:     1234,
+		Symbol: "TEST",
+		Name:   "Test Transaction",
+		Value:  9001,
+	}
+}
+
+func stubTrxAsStr() string {
+	return "{\"id\": 1234, \"symbol\": \"TEST\", \"name\": \"Test Transaction\", \"Value\": 9001}"
 }

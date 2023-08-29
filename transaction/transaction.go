@@ -3,13 +3,14 @@ package transaction
 import (
 	"TrxReceiver/rdb"
 	"encoding/json"
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 )
 
 const IntBase = 10
+
+var redisClient = rdb.Client()
 
 type Transaction struct {
 	Id     int     `json:"id"`
@@ -19,8 +20,6 @@ type Transaction struct {
 }
 
 func GetTransaction(trxId int) (*Transaction, []byte) {
-
-	redisClient := rdb.Client()
 
 	trxStr := rdb.Get(intToStr(trxId), redisClient)
 	trxByte := []byte(trxStr)
@@ -41,9 +40,8 @@ func CreateTransaction(r *http.Request) {
 
 	var s Transaction
 	parseTransactionBody(r, &s)
-	redisClient := rdb.Client()
 
-	writeToRedis(s, redisClient)
+	writeToRedis(s)
 	log.Debug().Msgf("Successfully created transaction %v", s.Id)
 }
 
@@ -56,11 +54,10 @@ func UpdateTransaction(r *http.Request, trxId int) {
 		log.Error().Msg("The trxID in URL Path does not match request body Transaction ID")
 	} else {
 
-		redisClient := rdb.Client()
 		trxDb := rdb.Get(intToStr(trxId), redisClient)
 		log.Debug().Msgf("Found existing transaction %+v", trxDb)
 
-		writeToRedis(trxBody, redisClient)
+		writeToRedis(trxBody)
 		log.Debug().Msgf("Successfully updated transaction %v", trxId)
 	}
 }
@@ -81,12 +78,12 @@ func intToStr(i int) string {
 	return strconv.FormatInt(int64(i), IntBase)
 }
 
-func writeToRedis(s Transaction, r *redis.Client) {
+func writeToRedis(s Transaction) {
 	jsonTrx, err := json.Marshal(s)
 
 	if err != nil {
 		log.Error().Msgf("Error trying to mashall Transaction to jsonTrx string: %v", err)
 	}
 
-	rdb.Set(intToStr(s.Id), string(jsonTrx[:]), r)
+	rdb.Set(intToStr(s.Id), string(jsonTrx[:]), redisClient)
 }
