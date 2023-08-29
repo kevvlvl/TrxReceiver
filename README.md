@@ -34,10 +34,6 @@ Run all unit tests
 ```shell
 go test ./...
 ```
-```shell
-API_PORT=4000 go run main.go
-```
-
 Run this App/APIs
 ```shell
 API_PORT=4000 go run main.go
