@@ -21,7 +21,9 @@ func TestHandleRouteGetRoot(t *testing.T) {
 
 	assert.Nil(t, err, "An error was returned for the new request")
 
-	Router(&redisClientMock).Router.ServeHTTP(w, r)
+	chiRouter := Router(&redisClientMock)
+	chiRouter.handleRoutes()
+	chiRouter.Router.ServeHTTP(w, r)
 
 	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
 	assert.Equal(t, "Root path", w.Body.String(), "The response body is not 'Root path'")
