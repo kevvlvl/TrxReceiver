@@ -5,6 +5,7 @@ import (
 	"TrxReceiver/transaction"
 	"context"
 	"github.com/go-redis/redismock/v9"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +20,8 @@ func TestHandleRouteGetRoot(t *testing.T) {
 
 	assert.Nil(t, err, "An error was returned for the new request")
 
-	serveHttpTestRequest(w, r)
+	redisDb, _ := redisMock()
+	serveHttpTestRequest(w, r, redisDb)
 
 	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
 	assert.Equal(t, "Root path", w.Body.String(), "The response body is not 'Root path'")
@@ -32,7 +34,8 @@ func TestHandleRouteGetHealth(t *testing.T) {
 
 	assert.Nil(t, err, "An error was returned for the new request")
 
-	serveHttpTestRequest(w, r)
+	redisDb, _ := redisMock()
+	serveHttpTestRequest(w, r, redisDb)
 
 	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
 	assert.Equal(t, "Up and Healthy", w.Body.String(), "The response body is not 'Root path'")
@@ -47,26 +50,29 @@ func TestHandleRoutePostStock(t *testing.T) {
 	r, err := http.NewRequest("POST", "/trx", strings.NewReader(stockString))
 	assert.Nil(t, err, "An error was returned for the new request")
 
-	redisMock := serveHttpTestRequest(w, r)
+	redisDb, mock := redisMock()
 
-	redisMock.ExpectSet(stock.IdStr(), string(stock.AsBytes()[:]), 0).SetVal("ok")
+	mock.ExpectSet(stock.IdStr(), stock.AsString(), 0).SetVal("ok")
+
+	serveHttpTestRequest(w, r, redisDb)
 
 	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
 }
 
-func serveHttpTestRequest(w *httptest.ResponseRecorder, r *http.Request) (redisMock redismock.ClientMock) {
+func redisMock() (client *redis.Client, mock redismock.ClientMock) {
+	return redismock.NewClientMock()
+}
 
-	red, mock := redismock.NewClientMock()
+func serveHttpTestRequest(w *httptest.ResponseRecorder, r *http.Request, client *redis.Client) {
+
 	redisClientMock := rdb.RedisDB{
-		Client:  red,
+		Client:  client,
 		Context: context.Background(),
 	}
 
 	chiRouter := Router(&redisClientMock)
 	chiRouter.handleRoutes()
 	chiRouter.Router.ServeHTTP(w, r)
-
-	return mock
 }
 
 func stockStub() transaction.Stock {
