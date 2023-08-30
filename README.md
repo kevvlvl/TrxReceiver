@@ -56,8 +56,7 @@ API_PORT=4000 go run main.go
 1. Create a simple API using go-chi with GET POST PUT ops - DONE
 2. Add logging - DONE
 3. Persist changes into an in-memory Redis cache - DONE
-4. Unit testing in go - NEXT
-   1. https://github.com/jarcoal/httpmock
+4. Unit testing in go - DONE
 5. Package app using Paketo buildpacks: https://paketo.io/docs/howto/go/
 6. Implement k6 for load testing on existing k8s cluster
 7. Add k8s manifests deployments & Paketo buildpacks here
