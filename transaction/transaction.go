@@ -5,25 +5,15 @@ import (
 	"encoding/json"
 	"github.com/rs/zerolog/log"
 	"net/http"
-	"strconv"
 )
-
-const IntBase = 10
 
 type Trx struct {
 	Redis *rdb.RedisDB
 }
 
-type Stock struct {
-	Id     int     `json:"id"`
-	Symbol string  `json:"symbol"`
-	Name   string  `json:"name"`
-	Value  float32 `json:"value"`
-}
+func (t *Trx) GetTransaction(stockId string) (*Stock, []byte) {
 
-func (t *Trx) GetTransaction(trxId int) (*Stock, []byte) {
-
-	trxStr := t.Redis.Get(intToStr(trxId))
+	trxStr := t.Redis.Get(stockId)
 	trxByte := []byte(trxStr)
 
 	var trx Stock
@@ -33,7 +23,7 @@ func (t *Trx) GetTransaction(trxId int) (*Stock, []byte) {
 		log.Error().Msgf("Error trying to unmarshall string byte to Stock. %v", err)
 	}
 
-	log.Debug().Msgf("Found transaction %+v for ID %v", trx, trxId)
+	log.Debug().Msgf("Found stock %+v for ID %v", trx, stockId)
 
 	return &trx, trxByte
 }
@@ -47,31 +37,25 @@ func (t *Trx) CreateTransaction(r *http.Request) {
 	log.Debug().Msgf("Successfully created transaction %v", s.Id)
 }
 
-func (t *Trx) UpdateTransaction(r *http.Request, trxId int) {
+func (t *Trx) UpdateTransaction(r *http.Request, stockId string) {
 
-	var trxBody Stock
-	parseTransactionBody(r, &trxBody)
+	var stockBody Stock
+	parseTransactionBody(r, &stockBody)
 
-	if trxBody.Id != trxId {
+	if stockBody.IdStr() != stockId {
 		log.Error().Msg("The trxID in URL Path does not match request body Stock ID")
 	} else {
 
-		trxDb := t.Redis.Get(intToStr(trxId))
-		log.Debug().Msgf("Found existing transaction %+v", trxDb)
+		stockDb := t.Redis.Get(stockBody.IdStr())
+		log.Debug().Msgf("Found existing stock %+v", stockDb)
 
-		t.writeToRedis(trxBody)
-		log.Debug().Msgf("Successfully updated transaction %v", trxId)
+		t.writeToRedis(stockBody)
+		log.Debug().Msgf("Successfully updated stock %v", stockId)
 	}
 }
 
 func (t *Trx) writeToRedis(s Stock) {
-	jsonTrx, err := json.Marshal(s)
-
-	if err != nil {
-		log.Error().Msgf("Error trying to mashall Stock to jsonTrx string: %v", err)
-	}
-
-	t.Redis.Set(intToStr(s.Id), string(jsonTrx[:]), 0)
+	t.Redis.Set(s.IdStr(), string(s.AsBytes()[:]), 0)
 }
 
 func parseTransactionBody(r *http.Request, s *Stock) {
@@ -83,9 +67,4 @@ func parseTransactionBody(r *http.Request, s *Stock) {
 	}
 
 	log.Debug().Msgf("Parsed JSON successfully: %+v", s)
-}
-
-func intToStr(i int) string {
-
-	return strconv.FormatInt(int64(i), IntBase)
 }
