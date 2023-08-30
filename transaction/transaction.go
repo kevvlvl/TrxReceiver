@@ -10,25 +10,27 @@ import (
 
 const IntBase = 10
 
-var redisClient = rdb.Client()
+type Trx struct {
+	Redis *rdb.RedisDB
+}
 
-type Transaction struct {
+type Stock struct {
 	Id     int     `json:"id"`
 	Symbol string  `json:"symbol"`
 	Name   string  `json:"name"`
 	Value  float32 `json:"value"`
 }
 
-func GetTransaction(trxId int) (*Transaction, []byte) {
+func (t *Trx) GetTransaction(trxId int) (*Stock, []byte) {
 
-	trxStr := rdb.Get(intToStr(trxId), redisClient)
+	trxStr := t.Redis.Get(intToStr(trxId))
 	trxByte := []byte(trxStr)
 
-	var trx Transaction
+	var trx Stock
 	err := json.Unmarshal(trxByte, &trx)
 
 	if err != nil {
-		log.Error().Msgf("Error trying to unmarshall string byte to Transaction. %v", err)
+		log.Error().Msgf("Error trying to unmarshall string byte to Stock. %v", err)
 	}
 
 	log.Debug().Msgf("Found transaction %+v for ID %v", trx, trxId)
@@ -36,33 +38,43 @@ func GetTransaction(trxId int) (*Transaction, []byte) {
 	return &trx, trxByte
 }
 
-func CreateTransaction(r *http.Request) {
+func (t *Trx) CreateTransaction(r *http.Request) {
 
-	var s Transaction
+	var s Stock
 	parseTransactionBody(r, &s)
 
-	writeToRedis(s)
+	t.writeToRedis(s)
 	log.Debug().Msgf("Successfully created transaction %v", s.Id)
 }
 
-func UpdateTransaction(r *http.Request, trxId int) {
+func (t *Trx) UpdateTransaction(r *http.Request, trxId int) {
 
-	var trxBody Transaction
+	var trxBody Stock
 	parseTransactionBody(r, &trxBody)
 
 	if trxBody.Id != trxId {
-		log.Error().Msg("The trxID in URL Path does not match request body Transaction ID")
+		log.Error().Msg("The trxID in URL Path does not match request body Stock ID")
 	} else {
 
-		trxDb := rdb.Get(intToStr(trxId), redisClient)
+		trxDb := t.Redis.Get(intToStr(trxId))
 		log.Debug().Msgf("Found existing transaction %+v", trxDb)
 
-		writeToRedis(trxBody)
+		t.writeToRedis(trxBody)
 		log.Debug().Msgf("Successfully updated transaction %v", trxId)
 	}
 }
 
-func parseTransactionBody(r *http.Request, s *Transaction) {
+func (t *Trx) writeToRedis(s Stock) {
+	jsonTrx, err := json.Marshal(s)
+
+	if err != nil {
+		log.Error().Msgf("Error trying to mashall Stock to jsonTrx string: %v", err)
+	}
+
+	t.Redis.Set(intToStr(s.Id), string(jsonTrx[:]), 0)
+}
+
+func parseTransactionBody(r *http.Request, s *Stock) {
 
 	err := json.NewDecoder(r.Body).Decode(&s)
 
@@ -76,14 +88,4 @@ func parseTransactionBody(r *http.Request, s *Transaction) {
 func intToStr(i int) string {
 
 	return strconv.FormatInt(int64(i), IntBase)
-}
-
-func writeToRedis(s Transaction) {
-	jsonTrx, err := json.Marshal(s)
-
-	if err != nil {
-		log.Error().Msgf("Error trying to mashall Transaction to jsonTrx string: %v", err)
-	}
-
-	rdb.Set(intToStr(s.Id), string(jsonTrx[:]), redisClient)
 }

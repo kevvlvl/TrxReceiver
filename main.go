@@ -1,7 +1,8 @@
 package main
 
 import (
-	"TrxReceiver/http"
+	"TrxReceiver/rdb"
+	"TrxReceiver/route"
 	"github.com/rs/zerolog"
 )
 
@@ -9,7 +10,8 @@ func main() {
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	r := http.Router()
-	http.HandleRoutes(r)
-	http.Serve(r)
+	redisClient := rdb.GetRedisClient("localhost", 6379, "")
+
+	chiRouter := route.Router(&redisClient)
+	chiRouter.ListenAndServe()
 }

@@ -13,7 +13,6 @@ import (
 func TestGetTransaction(t *testing.T) {
 
 	r, mock := redismock.NewClientMock()
-	redisClient = r
 
 	trx := stubTrx()
 	trxBytes, _ := json.Marshal(trx)
@@ -31,8 +30,7 @@ func TestCreateTransaction(t *testing.T) {
 	trx := stubTrx()
 	trxBytes, _ := json.Marshal(trx)
 
-	r, mock := redismock.NewClientMock()
-	redisClient = r
+	_, mock := redismock.NewClientMock()
 
 	reqUrl := "localhost:4000/trx"
 	req, _ := http.NewRequest("POST", reqUrl, bytes.NewBuffer([]byte(stubTrxAsStr())))
@@ -47,8 +45,7 @@ func TestUpdateTransaction(t *testing.T) {
 	trx := stubTrx()
 	trxBytes, _ := json.Marshal(trx)
 
-	r, mock := redismock.NewClientMock()
-	redisClient = r
+	_, mock := redismock.NewClientMock()
 
 	reqUrl := "localhost:4000/trx/1234"
 	req, _ := http.NewRequest("PUT", reqUrl, bytes.NewBuffer([]byte(stubTrxAsStr())))
@@ -71,8 +68,7 @@ func TestIntToStr(t *testing.T) {
 
 func TestWriteToRedis(t *testing.T) {
 
-	r, mock := redismock.NewClientMock()
-	redisClient = r
+	_, mock := redismock.NewClientMock()
 
 	trx := stubTrx()
 
@@ -86,15 +82,15 @@ func TestWriteToRedis(t *testing.T) {
 	writeToRedis(trx)
 }
 
-func stubTrx() Transaction {
-	return Transaction{
+func stubTrx() Stock {
+	return Stock{
 		Id:     1234,
 		Symbol: "TEST",
-		Name:   "Test Transaction",
+		Name:   "Test Stock",
 		Value:  9001,
 	}
 }
 
 func stubTrxAsStr() string {
-	return "{\"id\": 1234, \"symbol\": \"TEST\", \"name\": \"Test Transaction\", \"Value\": 9001}"
+	return "{\"id\": 1234, \"symbol\": \"TEST\", \"name\": \"Test Stock\", \"Value\": 9001}"
 }
