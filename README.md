@@ -99,11 +99,14 @@ TBD
 
 ## Next
 
-1. Create a simple API using go-chi with GET POST PUT ops - DONE
-2. Add logging - DONE
-3. Persist changes into an in-memory Redis cache - DONE
-4. Unit testing in go - DONE
-5. Package app using Paketo buildpacks: https://paketo.io/docs/howto/go/
+### Done
+1. Create a simple API using go-chi with GET POST PUT ops
+2. Add logging
+3. Persist changes into an in-memory Redis cache
+4. Unit testing in go
+5. Package app using buildpacks: https://buildpacks.io/docs/app-developer-guide/build-an-app/
+
+### TODO
 6. Implement k6 for load testing on existing k8s cluster
-7. Add k8s manifests deployments & Paketo buildpacks here
+7. Add k8s manifests deployments here
 8. View metrics on Prometheus + Grafana
