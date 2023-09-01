@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
 	"net/http"
-	"os"
 )
 
 type ChiRouter struct {
@@ -36,11 +35,9 @@ func Router(redisClient *rdb.RedisDB) ChiRouter {
 	}
 }
 
-func (router *ChiRouter) ListenAndServe() {
+func (router *ChiRouter) ListenAndServe(port string) {
 
 	router.handleRoutes()
-
-	port := os.Getenv("API_PORT")
 
 	if port == "" {
 		port = "3000"
