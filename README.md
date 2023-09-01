@@ -36,7 +36,7 @@ For the purpose of this README, we are using Rancher Desktop
 
 ### Local run
 
-Run Redis:
+#### Run Redis:
 ```shell
 
 ❯ docker run --name redis-db -p 127.0.0.1:6379:6379/tcp -d docker.io/redis
@@ -56,16 +56,31 @@ Storing signatures
 ❯ podman container ls
 CONTAINER ID  IMAGE                           COMMAND       CREATED             STATUS                 PORTS       NAMES
 3e62aa16fe25  docker.io/library/rdb:latest  rdb-server  About a minute ago  Up About a minute ago              rdb-db
-
 ```
 
-Run all unit tests
+#### Run the API
+
+Using the container that the buildpack built
+
 ```shell
-go test ./...
+docker run --name trxreceiver-app -p 127.0.0.1:4000:4000/tcp --env API_PORT=4000 -d trxreceiver-app
+19b1e6445d05726a7809c3453456761accf23c0477976a0b38ae779d2504f91e
+❯ docker container ls
+CONTAINER ID   IMAGE             COMMAND              CREATED         STATUS         PORTS                      NAMES
+19b1e6445d05   trxreceiver-app   "/cnb/process/web"   5 seconds ago   Up 2 seconds   127.0.0.1:4000->4000/tcp   trxreceiver-app
 ```
+
+Or running locally using go
+
 Run this App/APIs
 ```shell
 API_PORT=4000 go run main.go
+```
+
+### Run Unit tests
+
+```shell
+go test ./...
 ```
 
 ### Kubernetes
