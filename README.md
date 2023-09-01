@@ -63,7 +63,7 @@ CONTAINER ID  IMAGE                           COMMAND       CREATED             
 Using the container that the buildpack built
 
 ```shell
-docker run --name trxreceiver-app -p 127.0.0.1:4000:4000/tcp --env API_PORT=4000 -d trxreceiver-app
+docker run --name trxreceiver-app -p 127.0.0.1:4000:4000/tcp --env API_PORT=4000 --env REDIS_HOST=localhost --REDIS_PORT=6379 -d trxreceiver-app
 19b1e6445d05726a7809c3453456761accf23c0477976a0b38ae779d2504f91e
 ❯ docker container ls
 CONTAINER ID   IMAGE             COMMAND              CREATED         STATUS         PORTS                      NAMES
@@ -74,7 +74,8 @@ Or running locally using go
 
 Run this App/APIs
 ```shell
-API_PORT=4000 go run main.go
+export API_PORT=4000 REDIS_HOST=localhost REDIS_PORT=6379
+go run main.go
 ```
 
 ### Run Unit tests
