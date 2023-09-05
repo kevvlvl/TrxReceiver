@@ -6,16 +6,6 @@ import (
 	"strconv"
 )
 
-type Stock struct {
-	Id            int `json:"id"`
-	idStr         string
-	Symbol        string  `json:"symbol"`
-	Name          string  `json:"name"`
-	Value         float32 `json:"value"`
-	stockBytes    []byte
-	stockBytesStr string
-}
-
 func (s *Stock) AsBytes() []byte {
 
 	if s.stockBytes == nil {

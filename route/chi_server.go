@@ -11,19 +11,15 @@ import (
 	"net/http"
 )
 
-type ChiRouter struct {
-	Router *chi.Mux
-	Trx    *transaction.Trx
-}
-
 func Router(redisClient *rdb.RedisDB) ChiRouter {
 
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
+	r.Use(middleware.CleanPath)
 	r.Use(middleware.Logger)
+	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.RequestID)
 	r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 

@@ -5,12 +5,20 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
+	"os"
+	"strconv"
 	"time"
 )
 
-type RedisDB struct {
-	Context context.Context
-	Client  *redis.Client
+func Instance() RedisDB {
+
+	var (
+		redisHost    = os.Getenv("REDIS_HOST")
+		redisPort, _ = strconv.ParseInt(os.Getenv("REDIS_PORT"), 10, 0)
+		redisPass    = os.Getenv("REDIS_PASS")
+	)
+
+	return GetRedisClient(redisHost, int(redisPort), redisPass)
 }
 
 func GetRedisClient(addr string, port int, password string) RedisDB {

@@ -1,15 +1,10 @@
 package transaction
 
 import (
-	"TrxReceiver/rdb"
 	"encoding/json"
 	"github.com/rs/zerolog/log"
 	"net/http"
 )
-
-type Trx struct {
-	Redis *rdb.RedisDB
-}
 
 func (t *Trx) GetTransaction(stockId string) (*Stock, []byte) {
 
