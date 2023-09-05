@@ -9,14 +9,10 @@ import (
 
 func main() {
 
-	configureZeroLog()
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	redisClient := rdb.Instance()
 
 	chiRouter := route.Router(&redisClient)
 	chiRouter.ListenAndServe(os.Getenv("API_PORT"))
-}
-
-func configureZeroLog() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 }
