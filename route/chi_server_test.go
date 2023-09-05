@@ -59,6 +59,38 @@ func TestHandleRoutePostStock(t *testing.T) {
 	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
 }
 
+func TestHandleRoutePutStock(t *testing.T) {
+
+	stock := stockStub()
+	stockString := stock.AsString()
+
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest("PUT", "/trx/1234", strings.NewReader(stockString))
+	assert.Nil(t, err, "An error was returned for the new request")
+
+	redisDb, mock := redisMock()
+
+	mock.ExpectSet(stock.IdStr(), stock.AsString(), 0).SetVal("ok")
+
+	serveHttpTestRequest(w, r, redisDb)
+
+	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
+}
+
+func TestHandleRouteGetStockWhenNone_BodyEmpty(t *testing.T) {
+
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest("GET", "/trx/1234", nil)
+	assert.Nil(t, err, "An error was returned for the new request")
+
+	redisDb, _ := redisMock()
+
+	serveHttpTestRequest(w, r, redisDb)
+
+	assert.Equal(t, 200, w.Code, "The return code is not HTTP 200/OK")
+	assert.Nil(t, w.Body.Bytes())
+}
+
 func redisMock() (client *redis.Client, mock redismock.ClientMock) {
 	return redismock.NewClientMock()
 }
