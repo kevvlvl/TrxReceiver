@@ -95,5 +95,6 @@ TBD
 | GET root       | `curl localhost:4000/`                                                                                                 |
 | GET api health | `curl localhost:4000/health`                                                                                           |
 | GET trx        | `curl -X GET localhost:4000/trx/123`                                                                                   |
+| GET all trx    | `curl -X GET localhost:4000/trx`                                                                                       |
 | POST trx       | `curl -X POST localhost:4000/trx -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'`    |
 | PUT trx        | `curl -X PUT localhost:4000/trx/123 -d '{"id": 123, "symbol": "CSS", "name": "Counter-Strike Source", "Value": 9001}'` |
