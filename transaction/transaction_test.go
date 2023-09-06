@@ -65,7 +65,7 @@ func TestWriteToRedis(t *testing.T) {
 	stock := stockStub()
 
 	mock.ExpectSet(stock.IdStr(), stock.AsString(), 0).SetVal("ok")
-	trx.writeToRedis(stock)
+	trx.writeToRedis(&stock)
 }
 
 func trxTestSetup(r *redis.Client) Trx {
