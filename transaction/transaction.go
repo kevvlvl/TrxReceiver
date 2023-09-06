@@ -6,21 +6,35 @@ import (
 	"net/http"
 )
 
-func (t *Trx) GetTransaction(stockId string) (*Stock, []byte) {
+func (t *Trx) GetAll() []byte {
 
-	trxStr := t.Redis.Get(stockId)
-	trxByte := []byte(trxStr)
-
-	var trx Stock
-	err := json.Unmarshal(trxByte, &trx)
+	keys, err := t.Redis.Client.Keys(t.Redis.Context, "*").Result()
 
 	if err != nil {
-		log.Error().Msgf("Error trying to unmarshall string byte to Stock. %v", err)
+		log.Error().Msgf("Failed to obtain all keys. %v", err)
+		return nil
 	}
 
-	log.Debug().Msgf("Found stock %+v for ID %v", trx, stockId)
+	var stocks []Stock
+	for i := 0; i < len(keys); i++ {
 
-	return &trx, trxByte
+		currentStr := t.Redis.Get(keys[i])
+		currentStock, _ := unmarshalStock(currentStr)
+
+		stocks = append(stocks, currentStock)
+	}
+
+	log.Info().Msgf("Found %v number of entries in Redis", len(stocks))
+
+	return nil
+}
+
+func (t *Trx) GetTransaction(stockId string) []byte {
+
+	stockStr := t.Redis.Get(stockId)
+	_, b := unmarshalStock(stockStr)
+
+	return b
 }
 
 func (t *Trx) CreateTransaction(r *http.Request) {
@@ -62,4 +76,20 @@ func parseTransactionBody(r *http.Request, s *Stock) {
 	}
 
 	log.Debug().Msgf("Parsed JSON successfully: %+v", s)
+}
+
+func unmarshalStock(str string) (Stock, []byte) {
+
+	b := []byte(str)
+	var s Stock
+
+	err := json.Unmarshal(b, &s)
+
+	if err != nil {
+		log.Error().Msgf("Error trying to unmarshall string byte to Stock. %v", err)
+	}
+
+	log.Debug().Msgf("Found stock %+v for ID %v", s, s.Id)
+
+	return s, b
 }

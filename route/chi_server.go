@@ -53,22 +53,22 @@ func (router *ChiRouter) ListenAndServe(port string) {
 func (router *ChiRouter) handleRoutes() {
 
 	router.Router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-
-		_, err := w.Write([]byte("Root path"))
-		if err != nil {
-			return
-		}
+		writeBody(w, []byte("Root path"))
 	})
 
 	router.Router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-
-		_, err := w.Write([]byte("Up and Healthy"))
-		if err != nil {
-			return
-		}
+		writeBody(w, []byte("Up and Healthy"))
 	})
 
 	router.Router.Route("/trx", func(r chi.Router) {
+
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+
+			log.Info().Msgf("GET ALL")
+			allStocks := router.Trx.GetAll()
+
+			writeBody(w, allStocks)
+		})
 
 		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 
@@ -82,12 +82,9 @@ func (router *ChiRouter) handleRoutes() {
 				trxId := parseStockId(r)
 				log.Info().Msgf("GET on Stock ID %v", trxId)
 
-				_, trxBytes := router.Trx.GetTransaction(trxId)
+				trxBytes := router.Trx.GetTransaction(trxId)
 
-				_, err := w.Write(trxBytes)
-				if err != nil {
-					return
-				}
+				writeBody(w, trxBytes)
 			})
 
 			r.Put("/", func(w http.ResponseWriter, r *http.Request) {
@@ -105,4 +102,11 @@ func (router *ChiRouter) handleRoutes() {
 
 func parseStockId(r *http.Request) string {
 	return chi.URLParam(r, "trxID")
+}
+
+func writeBody(w http.ResponseWriter, b []byte) {
+
+	if _, err := w.Write(b); err != nil {
+		return
+	}
 }
