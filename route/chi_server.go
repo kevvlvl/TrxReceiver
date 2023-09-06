@@ -7,6 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	metrics "github.com/m8as/go-chi-metrics"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 	"net/http"
 )
@@ -21,6 +23,8 @@ func Router(redisClient *rdb.RedisDB) ChiRouter {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.URLFormat)
+	r.Use(metrics.SetRequestDuration)
+	r.Use(metrics.IncRequestCount)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	return ChiRouter{
@@ -41,10 +45,8 @@ func (router *ChiRouter) ListenAndServe(port string) {
 
 	log.Info().Msgf("Port: %v", port)
 
-	err := http.ListenAndServe(fmt.Sprintf(":%s", port), router.Router)
-
-	if err != nil {
-		return
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), router.Router); err != nil {
+		log.Info().Msgf("Listen and serve error: %v", err)
 	}
 }
 
@@ -97,6 +99,8 @@ func (router *ChiRouter) handleRoutes() {
 			})
 		})
 	})
+
+	router.Router.Handle("/prometheus", promhttp.Handler())
 }
 
 func parseStockId(r *http.Request) string {
