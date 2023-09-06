@@ -26,7 +26,13 @@ func (t *Trx) GetAll() []byte {
 
 	log.Info().Msgf("Found %v number of entries in Redis", len(stocks))
 
-	return nil
+	b, err := json.Marshal(stocks)
+
+	if err != nil {
+		log.Error().Msgf("Error trying to marshal stocks array to bytes. %v", err)
+	}
+
+	return b
 }
 
 func (t *Trx) GetTransaction(stockId string) []byte {
@@ -72,7 +78,7 @@ func parseTransactionBody(r *http.Request, s *Stock) {
 	err := json.NewDecoder(r.Body).Decode(s)
 
 	if err != nil {
-		log.Error().Msgf("Error parsing Request Body: %s", err)
+		log.Error().Msgf("Error parsing Request Body: %v", err)
 	}
 
 	log.Debug().Msgf("Parsed JSON successfully: %+v", s)
