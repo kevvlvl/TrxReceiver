@@ -1,27 +1,20 @@
 package rdb
 
 import (
+	"TrxReceiver/env"
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
-	"os"
-	"strconv"
 	"time"
 )
 
 func Instance() RedisDB {
 
-	var (
-		redisHost    = os.Getenv("REDIS_HOST")
-		redisPort, _ = strconv.ParseInt(os.Getenv("REDIS_PORT"), 10, 0)
-		redisPass    = os.Getenv("REDIS_PASS")
-	)
-
-	return GetRedisClient(redisHost, int(redisPort), redisPass)
+	return GetRedisClient(env.RedisHost(), env.RedisPort(), env.RedisPass())
 }
 
-func GetRedisClient(addr string, port int, password string) RedisDB {
+func GetRedisClient(addr string, port int64, password string) RedisDB {
 	redisClient := RedisDB{
 		Context: context.Background(),
 	}
@@ -53,7 +46,7 @@ func (rdb *RedisDB) Set(key string, value string, exp time.Duration) string {
 	return status
 }
 
-func (rdb *RedisDB) init(addr string, port int, password string) {
+func (rdb *RedisDB) init(addr string, port int64, password string) {
 	if rdb.Client == nil {
 		rdb.Client = redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%d", addr, port),

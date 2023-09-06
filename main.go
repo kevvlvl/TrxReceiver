@@ -1,10 +1,10 @@
 package main
 
 import (
+	"TrxReceiver/env"
 	"TrxReceiver/rdb"
 	"TrxReceiver/route"
 	"github.com/rs/zerolog"
-	"os"
 )
 
 func main() {
@@ -14,5 +14,5 @@ func main() {
 	redisClient := rdb.Instance()
 
 	chiRouter := route.Router(&redisClient)
-	chiRouter.ListenAndServe(os.Getenv("API_PORT"))
+	chiRouter.ListenAndServe(env.ApiPort())
 }
