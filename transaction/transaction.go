@@ -28,7 +28,7 @@ func (t *Trx) CreateTransaction(r *http.Request) {
 	var s Stock
 	parseTransactionBody(r, &s)
 
-	t.writeToRedis(s)
+	t.writeToRedis(&s)
 	log.Debug().Msgf("Successfully created transaction %v", s.Id)
 }
 
@@ -44,18 +44,18 @@ func (t *Trx) UpdateTransaction(r *http.Request, stockId string) {
 		stockDb := t.Redis.Get(stockBody.IdStr())
 		log.Debug().Msgf("Found existing stock %+v", stockDb)
 
-		t.writeToRedis(stockBody)
+		t.writeToRedis(&stockBody)
 		log.Debug().Msgf("Successfully updated stock %v", stockId)
 	}
 }
 
-func (t *Trx) writeToRedis(s Stock) {
-	t.Redis.Set(s.IdStr(), string(s.AsBytes()[:]), 0)
+func (t *Trx) writeToRedis(f FinancialInstrument) {
+	t.Redis.Set(f.IdStr(), string(f.AsBytes()[:]), 0)
 }
 
 func parseTransactionBody(r *http.Request, s *Stock) {
 
-	err := json.NewDecoder(r.Body).Decode(&s)
+	err := json.NewDecoder(r.Body).Decode(s)
 
 	if err != nil {
 		log.Error().Msgf("Error parsing Request Body: %s", err)

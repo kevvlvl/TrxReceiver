@@ -12,7 +12,7 @@ func (s *Stock) AsBytes() []byte {
 		b, err := json.Marshal(s)
 
 		if err != nil {
-			log.Error().Msgf("Error trying to mashall %+v to json bytes array: %s", s, err)
+			log.Error().Msgf("Error trying to marshall %+v to json bytes array: %s", s, err)
 		}
 
 		s.stockBytes = b

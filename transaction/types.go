@@ -12,6 +12,28 @@ type Stock struct {
 	stockBytesStr string
 }
 
+type Option struct {
+	Id             int `json:"id"`
+	idStr          string
+	Stock          Stock `json:"stock"`
+	Type           OptionType
+	optionBytes    []byte
+	optionBytesStr string
+}
+
+type FinancialInstrument interface {
+	AsBytes() []byte
+	AsString() string
+	IdStr() string
+}
+
+type OptionType string
+
+const (
+	OptionCall = "Call"
+	OptionPut  = "Put"
+)
+
 type Trx struct {
 	Redis *rdb.RedisDB
 }
