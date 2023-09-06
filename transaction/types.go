@@ -3,7 +3,7 @@ package transaction
 import "TrxReceiver/rdb"
 
 type Stock struct {
-	Id            int `json:"id"`
+	Id            int64 `json:"id"`
 	idStr         string
 	Symbol        string  `json:"symbol"`
 	Name          string  `json:"name"`
@@ -13,7 +13,7 @@ type Stock struct {
 }
 
 type Option struct {
-	Id             int `json:"id"`
+	Id             int64 `json:"id"`
 	idStr          string
 	Stock          Stock `json:"stock"`
 	Type           OptionType

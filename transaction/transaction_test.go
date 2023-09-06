@@ -20,9 +20,8 @@ func TestGetTransaction(t *testing.T) {
 
 	mock.ExpectGet(stock.IdStr()).SetVal(stock.AsString())
 
-	resultStock, resultStockBytes := trx.GetTransaction(stock.IdStr())
+	resultStockBytes := trx.GetTransaction(stock.IdStr())
 
-	assert.Equal(t, stock.Id, resultStock.Id, "The result trx is different from the expected trx")
 	assert.Equal(t, stock.AsBytes(), resultStockBytes, "The result trx bytes are different from the expected trx bytes")
 }
 

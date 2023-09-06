@@ -34,7 +34,7 @@ func (s *Stock) AsString() string {
 func (s *Stock) IdStr() string {
 
 	if s.idStr == "" {
-		s.idStr = strconv.FormatInt(int64(s.Id), 10)
+		s.idStr = strconv.FormatInt(s.Id, 10)
 	}
 
 	return s.idStr
